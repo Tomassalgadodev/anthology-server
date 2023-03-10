@@ -11,9 +11,19 @@ async function scrapeSearchArtist(artist) {
     //     fullPage: true,
     //     });
 
+    const searchResults = await page.$$('.LunqxlFIupJw_Dkx6mNx');
+
+    if (!searchResults.length) {
+        browser.close();
+        console.log('This search is too specific');
+        return;
+    }
+    
+    let numberToDisplay;
+    searchResults.length < 10 ? numberToDisplay = searchResults.length + 1 : numberToDisplay = 11;
     const artists = []
 
-    for (i = 1; i < 11; i++) {
+    for (i = 1; i < numberToDisplay; i++) {
         let [el] = await page.$x(`//*[@id="searchPage"]/div/div/div/div[1]/div[${i}]/div/div[1]/div[1]/div/img`);
         let src;
         let img;
@@ -82,5 +92,5 @@ async function scrapeGetAlbums(url) {
     return albumInfo;
 }
 
-scrapeSearchArtist('lizzo');
+scrapeSearchArtist('something very rare');
 // scrapeGetAlbums('https://open.spotify.com/artist/56oDRnqbIiwx4mymNEv7dS');
