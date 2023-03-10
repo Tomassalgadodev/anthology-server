@@ -11,21 +11,38 @@ async function scrapeSearchArtist(artist) {
     //     fullPage: true,
     //     });
 
+    const artists = []
 
-    const [el] = await page.$x('//*[@id="searchPage"]/div/div/div/div[1]/div[1]/div/div[1]/div[1]/div/img');
-    const src = await el.getProperty('src');
-    const img = await src.jsonValue();
+    for (i = 1; i < 11; i++) {
+        let [el] = await page.$x(`//*[@id="searchPage"]/div/div/div/div[1]/div[${i}]/div/div[1]/div[1]/div/img`);
+        let src;
+        let img;
 
-    const [el2] = await page.$x('//*[@id="searchPage"]/div/div/div/div[1]/div[1]/div/div[2]/a');
-    const href = await el2.getProperty('href');
-    const link = await href.jsonValue();
+        if (el) {
+            src = await el.getProperty('src');
+            img = await src.jsonValue();
+        } else {
+            img = 'No Image';
+        }
+        
+        let [el2] = await page.$x(`//*[@id="searchPage"]/div/div/div/div[1]/div[${i}]/div/div[2]/a/div`);
+        let txt = await el2.getProperty('textContent');
+        let artistName = await txt.jsonValue();
+    
+        let [el3] = await page.$x(`//*[@id="searchPage"]/div/div/div/div[1]/div[${i}]/div/div[2]/a`);
+        let href = await el3.getProperty('href');
+        let link = await href.jsonValue();
 
-    const [el3] = await page.$x('//*[@id="searchPage"]/div/div/div/div[1]/div[1]/div/div[2]/a/div');
-    const txt = await el3.getProperty('textContent');
-    const artistName = await txt.jsonValue();
+        artists.push({
+            artistImage: img,
+            artistName: artistName,
+            artistLink: link
+        })
+    }
 
-    console.log(img, link, artistName);
+    console.log(artists);
     browser.close();
+    return artists;
 }
 
 async function scrapeGetAlbums(url) {
@@ -65,5 +82,5 @@ async function scrapeGetAlbums(url) {
     return albumInfo;
 }
 
-// scrapeSearchArtist('lizzo');
+scrapeSearchArtist('lizzo');
 // scrapeGetAlbums('https://open.spotify.com/artist/56oDRnqbIiwx4mymNEv7dS');
