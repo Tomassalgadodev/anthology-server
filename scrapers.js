@@ -7,6 +7,8 @@ const puppeteer = require('puppeteer');
     //     fullPage: true,
     //     });
 
+// Scraping Functions:
+
 async function scrapeSearchArtist(artist) {
     const url = `https://open.spotify.com/search/${artist}/artists`;
     const browser = await puppeteer.launch();
@@ -130,6 +132,10 @@ async function scrapeGetArtist(artistID) {
 
 }
 
-// scrapeSearchArtist('ice spice');
-// scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
-scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
+// Function Calls:
+
+    // scrapeSearchArtist('ice spice');
+    // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
+    scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
+
+    export default { scrapeSearchArtist, scrapeGetAlbums, scrapeGetArtist };
