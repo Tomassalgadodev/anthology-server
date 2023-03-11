@@ -1,15 +1,17 @@
 const puppeteer = require('puppeteer');
 
+// Screen cap webpage:
+
+    // await page.screenshot({
+    //     path: './screenshot.png',
+    //     fullPage: true,
+    //     });
+
 async function scrapeSearchArtist(artist) {
     const url = `https://open.spotify.com/search/${artist}/artists`;
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(url, {"waitUntil" : "networkidle0"});
-    
-    // await page.screenshot({
-    //     path: './screenshot.png',
-    //     fullPage: true,
-    //     });
 
     const searchResults = await page.$$('.LunqxlFIupJw_Dkx6mNx');
 
@@ -92,5 +94,25 @@ async function scrapeGetAlbums(url) {
     return albumInfo;
 }
 
-scrapeSearchArtist('something very rare');
-// scrapeGetAlbums('https://open.spotify.com/artist/56oDRnqbIiwx4mymNEv7dS');
+async function scrapeGetArtist(artistID) {
+    const url = `https://open.spotify.com/artist/${artistID}`;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url, {"waitUntil" : "networkidle0"});
+
+    const [el] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[2]/span[2]/h1');
+    const txt = await el.getProperty('textContent');
+    const artistName = await txt.jsonValue();
+
+    const artistImage = await page.evaluate('document.querySelector(".MyW8tKEekj9lKQsviDdP").getAttribute("style")');
+
+    const artistInfo = { artistName: artistName, artistImage: artistImage }
+    console.log(artistInfo);
+    browser.close();
+    return artistInfo;
+
+}
+
+// scrapeSearchArtist('Kublai Khan');
+scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
+scrapeGetArtist('5BIOo2mCAokFcLHXO2Llb4');
