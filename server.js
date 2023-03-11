@@ -11,7 +11,7 @@ app.get('/', (request, response) => {
   response.send('Oh hey No Skips');
 });
 
-app.get('/api/v1/artists/:searchTerm', async (request, response) => {
+app.get('/api/v1/artistSearch/:searchTerm', async (request, response) => {
    
     const artists = await scrapers.scrapeSearchArtist(request.params.searchTerm);
 
