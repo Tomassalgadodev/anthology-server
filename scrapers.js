@@ -136,6 +136,8 @@ async function scrapeGetArtist(artistID) {
 
     // scrapeSearchArtist('ice spice');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
-    scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
+    // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
 
-    export default { scrapeSearchArtist, scrapeGetAlbums, scrapeGetArtist };
+    module.exports = {
+        scrapeSearchArtist
+    }
