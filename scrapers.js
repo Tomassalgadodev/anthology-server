@@ -99,11 +99,25 @@ async function scrapeGetArtist(artistID) {
     const page = await browser.newPage();
     await page.goto(url, {"waitUntil" : "networkidle0"});
 
-    const [el] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[2]/span[2]/h1');
+    let [el] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[2]/span[2]/h1');
+    let artistImage;
+    let el2;
+    
+    if (!el) {
+        [el] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[5]/span[2]/h1');
+        [el2] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[4]/div/img');
+    } else {
+        artistImage = await page.evaluate('document.querySelector(".MyW8tKEekj9lKQsviDdP").getAttribute("style")');
+    }
+
+    if (!el2) {
+        artistImage = 'No Image';
+    } else {
+        const src = await el2.getProperty('src');
+        artistImage = await src.jsonValue();
+    }
     const txt = await el.getProperty('textContent');
     const artistName = await txt.jsonValue();
-
-    const artistImage = await page.evaluate('document.querySelector(".MyW8tKEekj9lKQsviDdP").getAttribute("style")');
 
     const albumURL = `https://open.spotify.com/artist/${artistID}`;
 
@@ -116,6 +130,6 @@ async function scrapeGetArtist(artistID) {
 
 }
 
-// scrapeSearchArtist('Kublai Khan');
+// scrapeSearchArtist('ice spice');
 // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
-scrapeGetArtist('5BIOo2mCAokFcLHXO2Llb4');
+scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
