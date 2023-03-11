@@ -89,7 +89,6 @@ async function scrapeGetAlbums(url) {
         });
     }
 
-    console.log(albumInfo);
     browser.close();
     return albumInfo;
 }
@@ -106,7 +105,11 @@ async function scrapeGetArtist(artistID) {
 
     const artistImage = await page.evaluate('document.querySelector(".MyW8tKEekj9lKQsviDdP").getAttribute("style")');
 
-    const artistInfo = { artistName: artistName, artistImage: artistImage }
+    const albumURL = `https://open.spotify.com/artist/${artistID}`;
+
+    const albums = await scrapeGetAlbums(albumURL);
+
+    const artistInfo = { artistName: artistName, artistImage: artistImage, albums: albums }
     console.log(artistInfo);
     browser.close();
     return artistInfo;
@@ -114,5 +117,5 @@ async function scrapeGetArtist(artistID) {
 }
 
 // scrapeSearchArtist('Kublai Khan');
-scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
+// scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
 scrapeGetArtist('5BIOo2mCAokFcLHXO2Llb4');
