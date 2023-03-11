@@ -1,4 +1,4 @@
-const { response } = require('express');
+const { response, request } = require('express');
 const express = require('express');
 const app = express();
 
@@ -17,7 +17,16 @@ app.get('/api/v1/artists/:searchTerm', async (request, response) => {
 
     response.json({
         artists: artists
-    })
+    });
+});
+
+app.get('/api/v1/artist/:artistID', async (request, response) => {
+
+    const artistInfo = await scrapers.scrapeGetArtist(request.params.artistID);
+
+    response.json({
+        artistInfo: artistInfo
+    });
 });
 
 app.listen(app.get('port'), () => {

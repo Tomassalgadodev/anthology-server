@@ -139,5 +139,7 @@ async function scrapeGetArtist(artistID) {
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
 
     module.exports = {
-        scrapeSearchArtist
+        scrapeSearchArtist,
+        scrapeGetAlbums,
+        scrapeGetArtist
     }
