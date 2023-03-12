@@ -108,12 +108,12 @@ async function scrapeGetArtist(artistID) {
     if (!el) {
         [el] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[5]/span[2]/h1');
         [el2] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[4]/div/img');
-        if (!el2) {
-            artistImage = 'No Image';
-        } else {
+        // if (!el2) {
+        //     artistImage = 'No Image';
+        // } else {
             const src = await el2.getProperty('src');
             artistImage = await src.jsonValue();
-        }
+        // }
     } else {
         artistImage = await page.evaluate('document.querySelector(".MyW8tKEekj9lKQsviDdP").getAttribute("style")');
     }
