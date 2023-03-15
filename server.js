@@ -43,13 +43,13 @@ app.post('/api/v1/users', async (req, res) => {
     const { username, password } = req.body;
     
     if (username && password) {
-        const user = await db.query(
-            `SELECT *
-            FROM users
-            WHERE username = ?`,
+
+        const userWithUsername = await db.query(
+            `SELECT * FROM users WHERE username = ?`,
             [username]
         )
-        if (user[0].length === 0) {
+
+        if (userWithUsername[0].length === 0) {
             try {
                 db.query(
                     `INSERT INTO users(username, password) VALUES(?, ?)`,
@@ -57,15 +57,42 @@ app.post('/api/v1/users', async (req, res) => {
                 );
                 res.status(201).send({ msg: 'Created User' });
             } catch (err) {
-                console.log(1, err);
+                console.log(err);
             }
         } else {
-            res.send({ msg: 'That username already exists' })
+            res.send({ msg: 'That username already exists' });
         }
     } else {
         res.send({ msg: 'Input a username and password' });
     }
 });
+
+app.post('/api/v1/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    if (username && password) {
+
+        const user = await db.query(
+            'SELECT * FROM users WHERE username = ? AND password = ?',
+            [username, password]
+        )
+
+        if (user[0].length === 1) {
+
+            res.send({ msg: 'Success', user: user[0][0] });
+
+        } else {
+
+            res.send({ msg: 'Wrong combination' });
+
+        }
+
+    } else {
+
+        res.send({ msg: 'Input a username and password' });
+        
+    }
+})
 
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
