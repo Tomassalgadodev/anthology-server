@@ -39,18 +39,29 @@ app.get('/api/v1/users', async (req, res) => {
     res.send(users[0]);
 });
 
-app.post('/api/v1/users', (req, res) => {
+app.post('/api/v1/users', async (req, res) => {
     const { username, password } = req.body;
 
+    
     if (username && password) {
-        try {
-            db.query(
-                `INSERT INTO users(username, password) VALUES(?, ?)`,
-                [username, password]
-            );
-            res.status(201).send({ msg: 'Created User' });
-        } catch (err) {
-            console.log(1, err);
+        const userExists = await db.query(
+            `SELECT *
+            FROM users
+            WHERE username = ?`,
+            [username]
+        )
+        if (userExists[0].length === 0) {
+            try {
+                db.query(
+                    `INSERT INTO users(username, password) VALUES(?, ?)`,
+                    [username, password]
+                );
+                res.status(201).send({ msg: 'Created User' });
+            } catch (err) {
+                console.log(1, err);
+            }
+        } else {
+            res.send('That username already exists')
         }
     } else {
         res.send('Input a username and password');
