@@ -41,7 +41,6 @@ app.get('/api/v1/users', async (req, res) => {
 
 app.post('/api/v1/users', async (req, res) => {
     const { username, password } = req.body;
-
     
     if (username && password) {
         const userExists = await db.query(
@@ -61,10 +60,10 @@ app.post('/api/v1/users', async (req, res) => {
                 console.log(1, err);
             }
         } else {
-            res.send('That username already exists')
+            res.send({ msg: 'That username already exists' })
         }
     } else {
-        res.send('Input a username and password');
+        res.send({ msg: 'Input a username and password' });
     }
 });
 
