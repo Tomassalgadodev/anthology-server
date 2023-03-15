@@ -43,13 +43,13 @@ app.post('/api/v1/users', async (req, res) => {
     const { username, password } = req.body;
     
     if (username && password) {
-        const userExists = await db.query(
+        const user = await db.query(
             `SELECT *
             FROM users
             WHERE username = ?`,
             [username]
         )
-        if (userExists[0].length === 0) {
+        if (user[0].length === 0) {
             try {
                 db.query(
                     `INSERT INTO users(username, password) VALUES(?, ?)`,
