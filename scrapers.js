@@ -133,11 +133,27 @@ async function scrapeGetArtist(artistID) {
 
 }
 
+async function scrapeSearchArtist2(artist) {
+    const url = `https://www.allmusic.com/search/artists/${artist}`;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url)
+
+    const [el] = await page.$x('//*[@id="cmn_wrap"]/div/div[2]/div/ul/li[1]/div[2]/div[1]/a');
+    const txt = await el.getProperty('textContent');
+    const artistName = await txt.jsonValue();
+
+    console.log(artistName);
+
+    browser.close();
+}
+
 // Function Calls:
 
     // scrapeSearchArtist('ice spice');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
+    // scrapeSearchArtist2('joker');
 
     module.exports = {
         scrapeSearchArtist,

@@ -1,6 +1,9 @@
 const { response, request } = require('express');
 const express = require('express');
 const app = express();
+const db = require('./database');
+
+app.use(express.json());
 
 const scrapers = require('./scrapers');
 const cors = require('cors');
@@ -29,6 +32,29 @@ app.get('/api/v1/artist/:artistID', async (request, response) => {
     response.json({
         artistInfo: artistInfo
     });
+});
+
+app.get('/api/v1/users', async (req, res) => {
+    const users = await db.query('SELECT * FROM users');
+    res.send(users[0]);
+});
+
+app.post('/api/v1/users', (req, res) => {
+    const { username, password } = req.body;
+
+    if (username && password) {
+        try {
+            db.query(
+                `INSERT INTO users(username, password) VALUES(?, ?)`,
+                [username, password]
+            );
+            res.status(201).send({ msg: 'Created User' });
+        } catch (err) {
+            console.log(1, err);
+        }
+    } else {
+        res.send('Input a username and password');
+    }
 });
 
 app.listen(app.get('port'), () => {
