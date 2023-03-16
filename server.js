@@ -40,6 +40,26 @@ app.get('/api/v1/users', async (req, res) => {
     res.send(users[0]);
 });
 
+app.get('/api/v1/userdata', async (req, res) => {
+    const sessionID = req.headers.cookie.substring(8);
+    let username = await db.query(
+        `SELECT username FROM cookies
+        WHERE cookie = ?`,
+        [sessionID]
+    )
+
+    if (username[0].length === 1) {
+        username = username[0][0].username;
+        const userdata = await db.query(
+            'SELECT * FROM user_data WHERE username = ?',
+            [username]
+        )
+        res.send(userdata[0][0]); 
+    } else {
+        res.send({ msg: 'not logged in' });
+    }
+});
+
 app.post('/api/v1/users', async (req, res) => {
     const { username, password, firstname, lastname, email } = req.body;
     
@@ -101,7 +121,9 @@ app.post('/api/v1/login', async (req, res) => {
         res.send({ msg: 'Input a username and password' });
 
     }
-})
+});
+
+
 
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
