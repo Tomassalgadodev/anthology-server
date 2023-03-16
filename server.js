@@ -123,6 +123,25 @@ app.post('/api/v1/login', async (req, res) => {
     }
 });
 
+app.post('/api/v1/logout', async (req, res) => {
+    
+    if (req.headers.cookie) {
+        const sessionID = req.headers.cookie.substring(8);
+
+        const deleted = await db.query(
+            'DELETE FROM cookies WHERE cookie = ?', 
+            [sessionID],
+        );
+
+        res.set('Set-Cookie', 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT');
+        
+        res.send('success');
+    } else {
+        res.send('No ones logged in');
+    }
+
+});
+
 
 
 app.listen(app.get('port'), () => {
