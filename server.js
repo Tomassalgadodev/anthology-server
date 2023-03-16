@@ -1,13 +1,14 @@
 const { response, request } = require('express');
 const express = require('express');
-const app = express();
+const cors = require('cors');
+const scrapers = require('./scrapers');
 const db = require('./database');
+const uuid = require('uuid').v4;
+const app = express();
 
 app.use(express.json());
-
-const scrapers = require('./scrapers');
-const cors = require('cors');
 app.use(cors());
+
 
 app.set('port', process.env.PORT || 8000);
 app.locals.title = 'No Skips';
@@ -90,11 +91,10 @@ app.post('/api/v1/login', async (req, res) => {
     } else {
 
         res.send({ msg: 'Input a username and password' });
-        
+
     }
 })
 
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
 });
-
