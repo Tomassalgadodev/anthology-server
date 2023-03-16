@@ -41,9 +41,9 @@ app.get('/api/v1/users', async (req, res) => {
 });
 
 app.post('/api/v1/users', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, firstname, lastname, email } = req.body;
     
-    if (username && password) {
+    if (username && password && firstname && lastname && email) {
 
         const userWithUsername = await db.query(
             `SELECT * FROM users WHERE username = ?`,
@@ -53,9 +53,13 @@ app.post('/api/v1/users', async (req, res) => {
         if (userWithUsername[0].length === 0) {
             try {
                 db.query(
-                    `INSERT INTO users(username, password) VALUES(?, ?)`,
-                    [username, password]
+                    'INSERT INTO users(username, password, first_name, last_name, email) VALUES(?, ?, ?, ?, ?)',
+                    [username, password, firstname, lastname, email]
                 );
+                db.query(
+                    'INSERT INTO user_data(username, first_name) VALUES(?, ?)',
+                    [username, firstname]
+                )
                 res.status(201).send({ msg: 'Created User' });
             } catch (err) {
                 console.log(err);
@@ -64,7 +68,7 @@ app.post('/api/v1/users', async (req, res) => {
             res.send({ msg: 'That username already exists' });
         }
     } else {
-        res.send({ msg: 'Input a username and password' });
+        res.send({ msg: 'Fill out all fields' });
     }
 });
 
