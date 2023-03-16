@@ -87,7 +87,7 @@ app.post('/api/v1/login', async (req, res) => {
             const sessionID = uuid();
             const username = user[0][0].username
             res.set('Set-Cookie', `session=${sessionID}`);
-            db.query('INSERT INTO cookies VALUES(?, ?)', [sessionID, username]);
+            db.query('INSERT INTO cookies(cookie, username) VALUES(?, ?)', [sessionID, username]);
             res.send({ msg: 'Success', user: user[0][0] });
 
         } else {
