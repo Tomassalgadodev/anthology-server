@@ -8,11 +8,15 @@ const app = express();
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('withCredentials', true);
     next();
 });
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 
 
 app.set('port', process.env.PORT || 8000);
@@ -116,7 +120,7 @@ app.post('/api/v1/login', async (req, res) => {
             const username = user[0][0].username
             res.set('Set-Cookie', `session=${sessionID}`);
             db.query('INSERT INTO cookies(cookie, username) VALUES(?, ?)', [sessionID, username]);
-            res.send({ msg: 'Success', user: user[0][0] });
+            res.status(201).send({ msg: 'Success', user: user[0][0] });
 
         } else {
 
