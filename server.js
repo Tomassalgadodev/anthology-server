@@ -120,7 +120,7 @@ app.post('/api/v1/login', async (req, res) => {
 
         } else {
 
-            res.send({ msg: 'Wrong combination' });
+            res.status(401).send({ msg: 'Wrong combination' });
 
         }
 
