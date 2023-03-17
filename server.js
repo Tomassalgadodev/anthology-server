@@ -6,6 +6,11 @@ const db = require('./database');
 const uuid = require('uuid').v4;
 const app = express();
 
+app.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    next();
+});
+
 app.use(express.json());
 app.use(cors());
 
@@ -59,10 +64,10 @@ app.get('/api/v1/userdata', async (req, res) => {
             )
             res.send(userdata[0][0]); 
         } else {
-            res.status(401).send('Not logged in');
+            res.status(401).send({ msg: 'Not logged in' });
         }
     }  else {
-        res.status(401).send('Not logged in');
+        res.status(401).send({ msg: 'Not logged in' });
     }
 
 });
