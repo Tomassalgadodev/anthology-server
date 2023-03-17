@@ -59,10 +59,10 @@ app.get('/api/v1/userdata', async (req, res) => {
             )
             res.send(userdata[0][0]); 
         } else {
-            res.send({ msg: 'not logged in' });
+            res.status(401).send('Not logged in');
         }
     }  else {
-        res.send({ msg: 'not logged in' });
+        res.status(401).send('Not logged in');
     }
 
 });
