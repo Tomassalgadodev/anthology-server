@@ -83,10 +83,6 @@ app.post('/api/v1/users', async (req, res) => {
                     'INSERT INTO users(username, password, first_name, last_name, email) VALUES(?, ?, ?, ?, ?)',
                     [username, password, firstname, lastname, email]
                 );
-                db.query(
-                    'INSERT INTO user_data(username, first_name) VALUES(?, ?)',
-                    [username, firstname]
-                )
                 res.status(201).send({ msg: 'Created User' });
             } catch (err) {
                 console.log(err);
