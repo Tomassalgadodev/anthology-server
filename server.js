@@ -8,11 +8,11 @@ const app = express();
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('withCredentials', true);
     next();
 });
 
 app.use(express.json());
+
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
@@ -147,9 +147,9 @@ app.post('/api/v1/logout', async (req, res) => {
 
         res.set('Set-Cookie', 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT');
         
-        res.send('success');
+        res.send({ msg: 'success' });
     } else {
-        res.send('No ones logged in');
+        res.send({ msg: 'No ones logged in' });
     }
 
 });
