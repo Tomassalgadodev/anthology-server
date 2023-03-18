@@ -6,7 +6,7 @@ const db = require('./database');
 const uuid = require('uuid').v4;
 const app = express();
 
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     next();
 });
@@ -97,10 +97,10 @@ app.post('/api/v1/users', async (req, res) => {
                 console.log(err);
             }
         } else {
-            res.send({ msg: 'That username already exists' });
+            res.status(409).send({ msg: 'That username already exists' });
         }
     } else {
-        res.send({ msg: 'Fill out all fields' });
+        res.status(422).send({ msg: 'Fill out all fields' });
     }
 });
 
