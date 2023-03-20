@@ -49,6 +49,32 @@ app.get('/api/v1/users', async (req, res) => {
     res.send(users[0]);
 });
 
+app.get('/api/v1/user', async (req, res) => {
+
+    console.log('cookie:', req.headers.cookie);
+    if(req.headers.cookie) {
+        const sessionID = req.headers.cookie.substring(8);
+        let username = await db.query(
+            `SELECT username FROM cookies
+            WHERE cookie = ?`,
+            [sessionID]
+        )
+    
+        if (username[0].length === 1) {
+            username = username[0][0].username;
+            const user = await db.query(
+                'SELECT * FROM users WHERE username = ?',
+                [username]
+            )
+            res.send(user[0][0]); 
+        } else {
+            res.status(401).send({ msg: 'Not logged in' });
+        }
+    }  else {
+        res.status(401).send({ msg: 'Not logged in' });
+    }
+});
+
 app.get('/api/v1/userdata', async (req, res) => {
 
     console.log('cookie:', req.headers.cookie);
@@ -73,7 +99,6 @@ app.get('/api/v1/userdata', async (req, res) => {
     }  else {
         res.status(401).send({ msg: 'Not logged in' });
     }
-
 });
 
 app.post('/api/v1/users', async (req, res) => {
