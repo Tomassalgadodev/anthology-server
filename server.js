@@ -236,13 +236,13 @@ app.post('/api/v1/removeSavedAlbum', async (req, res) => {
     
         if (username[0].length === 1) {
             username = username[0][0].username;
-            const deleteAlbum = await db.query(
+            const attemptDeleteAlbum = await db.query(
                 `UPDATE user_data 
                 SET albums = JSON_REMOVE(albums, REPLACE(REPLACE(JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"'), '"', ''), '.link', ''))
                 WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NOT NULL;`,
                 [link, username, link]
             )
-            if (deleteAlbum[0].changedRows > 0) {
+            if (attemptDeleteAlbum[0].changedRows > 0) {
                 res.status(201).send({ msg: `Success!` }); 
             } else {
                 res.status(201).send({ msg: `Album not liked by user` }); 
