@@ -118,6 +118,9 @@ async function scrapeGetArtist(artistID) {
         artistImage = await page.evaluate('document.querySelector(".MyW8tKEekj9lKQsviDdP").getAttribute("style")');
     }
 
+    if (!el) {
+        return { errorMsg: `Not verified` }
+    }
 
     const txt = await el.getProperty('textContent');
     const artistName = await txt.jsonValue();
