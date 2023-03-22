@@ -39,8 +39,6 @@ app.get('/api/v1/artist/:artistID', async (request, response) => {
 
     const artistInfo = await scrapers.scrapeGetArtist(request.params.artistID);
 
-    console.log(artistInfo);
-
     response.json({
         artistInfo: artistInfo
     });

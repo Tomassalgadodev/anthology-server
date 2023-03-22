@@ -101,6 +101,12 @@ async function scrapeGetArtist(artistID) {
     const page = await browser.newPage();
     await page.goto(url, {"waitUntil" : "networkidle0"});
 
+    let [errEl] = await page.$x('/html/body/div/div[2]/h1');
+    
+    if (errEl) {
+        return { errorMsg: `Artist doesn't exist` }
+    }
+
     let [el] = await page.$x('//*[@id="main"]/div/div[2]/div[3]/div[1]/div[2]/div[2]/div/div/div[2]/main/section/div/div[1]/div[2]/span[2]/h1');
     let artistImage;
     let el2;
