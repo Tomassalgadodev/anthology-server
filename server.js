@@ -51,7 +51,7 @@ app.get('/api/v1/users', async (req, res) => {
 
 app.get('/api/v1/user', async (req, res) => {
 
-    console.log('cookie:', req.headers.cookie);
+    // console.log('cookie:', req.headers.cookie);
     if(req.headers.cookie) {
         const sessionID = req.headers.cookie.substring(8);
         let username = await db.query(
@@ -77,7 +77,7 @@ app.get('/api/v1/user', async (req, res) => {
 
 app.get('/api/v1/userdata', async (req, res) => {
 
-    console.log('cookie:', req.headers.cookie);
+    // console.log('cookie:', req.headers.cookie);
     if(req.headers.cookie) {
         const sessionID = req.headers.cookie.substring(8);
         let username = await db.query(
@@ -178,6 +178,39 @@ app.post('/api/v1/logout', async (req, res) => {
     }
 
 });
+
+app.post('/api/v1/savedAlbums', async (req, res) => {
+
+    const { albumArt, albumTitle, artistID, artistName, link, yearReleased } = req.body;
+
+    if (!albumArt || !albumTitle || !artistID || !artistName || !link || !yearReleased) {
+        res.status(422).send({ msg: 'Missing album data' })
+    }
+    
+    if(req.headers.cookie) {
+        const sessionID = req.headers.cookie.substring(8);
+        let username = await db.query(
+            `SELECT username FROM cookies
+            WHERE cookie = ?`,
+            [sessionID]
+        )
+    
+        if (username[0].length === 1) {
+            username = username[0][0].username;
+            const albumData = await db.query(
+                `UPDATE user_data 
+                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?))
+                WHERE username = ?;`,
+                [albumArt, albumTitle, artistID, artistName, link, yearReleased, username]
+            )
+            res.status(201).send({ msg: `Success! ${albumData[0].changedRows} row(s) changed` }); 
+        } else {
+            res.status(401).send({ msg: 'Not logged in' });
+        }
+    }  else {
+        res.status(401).send({ msg: 'Not logged in' });
+    }
+})
 
 
 
