@@ -197,13 +197,19 @@ app.post('/api/v1/addSavedAlbum', async (req, res) => {
     
         if (username[0].length === 1) {
             username = username[0][0].username;
-            const albumData = await db.query(
+            const attemptAddAlbum = await db.query(
                 `UPDATE user_data 
                 SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?))
-                WHERE username = ?;`,
-                [albumArt, albumTitle, artistID, artistName, link, yearReleased, username]
+                WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
+                [albumArt, albumTitle, artistID, artistName, link, yearReleased, username, link]
             )
-            res.status(201).send({ msg: `Success! ${albumData[0].changedRows} row(s) changed` }); 
+            
+            if (attemptAddAlbum[0].changedRows > 0) {
+                res.status(201).send({ msg: `Success! ${attemptAddAlbum[0].changedRows} row(s) changed` }); 
+            } else {
+                res.status(201).send({ msg: 'Album already liked' }); 
+            }
+
         } else {
             res.status(401).send({ msg: 'Not logged in' });
         }
