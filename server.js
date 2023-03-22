@@ -101,6 +101,31 @@ app.get('/api/v1/userdata', async (req, res) => {
     }
 });
 
+app.get('/api/v1/savedAlbums', async (req, res) => {
+
+    if(req.headers.cookie) {
+        const sessionID = req.headers.cookie.substring(8);
+        let username = await db.query(
+            `SELECT username FROM cookies
+            WHERE cookie = ?`,
+            [sessionID]
+        )
+    
+        if (username[0].length === 1) {
+            username = username[0][0].username;
+            const userdata = await db.query(
+                'SELECT albums FROM user_data WHERE username = ?',
+                [username]
+            )
+            res.status(200).send(userdata[0][0].albums); 
+        } else {
+            res.status(401).send({ msg: 'Not logged in' });
+        }
+    }  else {
+        res.status(401).send({ msg: 'Not logged in' });
+    }
+});
+
 app.post('/api/v1/users', async (req, res) => {
     const { username, password, firstname, lastname, email } = req.body;
     
@@ -254,7 +279,6 @@ app.post('/api/v1/removeSavedAlbum', async (req, res) => {
         res.status(401).send({ msg: 'Not logged in' });
     }
 })
-
 
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
