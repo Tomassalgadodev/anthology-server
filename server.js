@@ -179,7 +179,7 @@ app.post('/api/v1/logout', async (req, res) => {
 
 });
 
-app.post('/api/v1/savedAlbums', async (req, res) => {
+app.post('/api/v1/addSavedAlbum', async (req, res) => {
 
     const { albumArt, albumTitle, artistID, artistName, link, yearReleased } = req.body;
 
@@ -210,8 +210,44 @@ app.post('/api/v1/savedAlbums', async (req, res) => {
     }  else {
         res.status(401).send({ msg: 'Not logged in' });
     }
-})
+});
 
+app.post('/api/v1/removeSavedAlbum', async (req, res) => {
+    
+    const { link } = req.body;
+
+    if (!link) {
+        res.status(422).send({ msg: 'Must provide a link' })
+    }
+    
+    if(req.headers.cookie) {
+        const sessionID = req.headers.cookie.substring(8);
+        let username = await db.query(
+            `SELECT username FROM cookies
+            WHERE cookie = ?`,
+            [sessionID]
+        )
+    
+        if (username[0].length === 1) {
+            username = username[0][0].username;
+            const deleteAlbum = await db.query(
+                `UPDATE user_data 
+                SET albums = JSON_REMOVE(albums, REPLACE(REPLACE(JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"'), '"', ''), '.link', ''))
+                WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NOT NULL;`,
+                [link, username, link]
+            )
+            if (deleteAlbum[0].changedRows > 0) {
+                res.status(201).send({ msg: `Success!` }); 
+            } else {
+                res.status(201).send({ msg: `Album not liked by user` }); 
+            }
+        } else {
+            res.status(401).send({ msg: 'Not logged in' });
+        }
+    }  else {
+        res.status(401).send({ msg: 'Not logged in' });
+    }
+})
 
 
 app.listen(app.get('port'), () => {
