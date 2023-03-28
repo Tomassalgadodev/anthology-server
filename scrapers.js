@@ -10,6 +10,9 @@ const puppeteer = require('puppeteer');
 // Scraping Functions:
 
 async function scrapeSearchArtist(artist) {
+
+    const start = Date.now();
+
     const url = `https://open.spotify.com/search/${artist}/artists`;
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -51,10 +54,11 @@ async function scrapeSearchArtist(artist) {
             artistImage: img,
             artistName: artistName,
             artistLink: link
-        })
+        });
     }
 
     // console.log(artists);
+    console.log(`Total time: ${Date.now() - start} milliseconds`);
     browser.close();
     return artists;
 }
@@ -161,9 +165,69 @@ async function scrapeSearchArtist2(artist) {
     browser.close();
 }
 
+async function scrapeSearchArtist3(artist) {
+
+    const start = Date.now();
+
+    const artistUrl = `https://open.spotify.com/search/${artist}/artists`;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+
+    // let i = 0;
+    // let j = 0;
+    // let k = 0;
+
+    page.on('request', async (request) => {
+        const url = request.url();
+    
+        if (
+            url.includes('https://open.spotifycdn.com/cdn/build/web-player/web-player.713d3e01.css') ||
+            url.includes('https://open.spotifycdn.com/cdn/build/web-player/vendor~web-player.65779e3d.css') ||
+            url.includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=fetchPlaylistMetadata&variables')
+            ) {
+            // console.log(i);
+            // i++;
+            // console.log(url);
+            request.abort();
+        } else {
+            if (url.includes(artist) || url.includes('https://open.spotifycdn.com/cdn/build/web-player')) {
+                // console.log('BINGO ' + j);
+                // j++;
+                // console.log(url);
+                request.continue();
+            } else {
+                // console.log(i);
+                // i++;
+                // console.log(url);
+                request.abort();
+            }
+        }
+    
+
+    });
+
+    page.on('response', async(response) => {
+        const request = response.request();
+        
+        if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=searchArtists') && request.method() === 'GET') {
+            const data = await response.json();
+            console.log(data.data.searchV2.artists.items);
+            return data;
+        }
+    })
+
+    await page.goto(artistUrl, {"waitUntil" : "networkidle0"});
+
+    console.log(`Total time: ${Date.now() - start} milliseconds`);
+    browser.close();
+}
+
 // Function Calls:
 
-    // scrapeSearchArtist('ice spice');
+    // scrapeSearchArtist('kublai');
+    scrapeSearchArtist3('kublai');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
     // scrapeSearchArtist2('joker');
