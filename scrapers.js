@@ -168,6 +168,7 @@ async function scrapeSearchArtist2(artist) {
 async function scrapeSearchArtist3(artist) {
 
     const start = Date.now();
+    let data;
 
     const artistUrl = `https://open.spotify.com/search/${artist}/artists`;
     const browser = await puppeteer.launch();
@@ -176,7 +177,7 @@ async function scrapeSearchArtist3(artist) {
     await page.setRequestInterception(true);
 
     // let i = 0;
-    // let j = 0;
+    let j = 0;
     // let k = 0;
 
     page.on('request', async (request) => {
@@ -192,10 +193,14 @@ async function scrapeSearchArtist3(artist) {
             // console.log(url);
             request.abort();
         } else {
-            if (url.includes(artist) || url.includes('https://open.spotifycdn.com/cdn/build/web-player')) {
-                // console.log('BINGO ' + j);
-                // j++;
-                // console.log(url);
+            if (
+                url.includes('https://open.spotify.com/search/') ||
+                url.includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=search') || 
+                url.includes('https://open.spotifycdn.com/cdn/build/web-player')
+                ) {
+                console.log('BINGO ' + j);
+                j++;
+                console.log(url);
                 request.continue();
             } else {
                 // console.log(i);
@@ -212,22 +217,22 @@ async function scrapeSearchArtist3(artist) {
         const request = response.request();
         
         if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=searchArtists') && request.method() === 'GET') {
-            const data = await response.json();
-            console.log(data.data.searchV2.artists.items);
-            return data;
+            data = await response.json();
         }
-    })
+    });
 
     await page.goto(artistUrl, {"waitUntil" : "networkidle0"});
 
-    console.log(`Total time: ${Date.now() - start} milliseconds`);
+    console.log(data);
     browser.close();
+    console.log(`Total time: ${Date.now() - start} milliseconds`);
+    return data;
 }
 
 // Function Calls:
 
     // scrapeSearchArtist('kublai');
-    scrapeSearchArtist3('kublai');
+    scrapeSearchArtist3('taylor swift');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
     // scrapeSearchArtist2('joker');
