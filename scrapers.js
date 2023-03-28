@@ -270,11 +270,49 @@ async function scrapeGetArtistDirect(artistID) {
     return(data);
 }
 
+async function scrapeGetAlbumDirect(albumID) {
+
+    let data;
+
+    const url = `https://open.spotify.com/album/${albumID}`;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+
+    page.on('request', async (request) => {
+        const url = request.url();
+
+        if (
+            url.includes(albumID) ||
+            url.includes('https://open.spotifycdn.com/cdn/build/web-player') ||
+            url.includes('https://spclient.wg.spotify.com/gabo-receiver-service/public/v3/events')
+            ) {
+            request.continue();
+        } else {
+            request.abort();
+        }
+    });
+
+    page.on('response', async (response) => {
+        const request = response.request();
+        if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=queryAlbumTracks&variables') && request.method() === 'GET') {
+            data = await response.json();
+        }
+    });
+
+    await page.goto(url, {"waitUntil" : "networkidle0"});
+    browser.close();
+    console.log(data);
+    return(data);
+}
+
 // Function Calls:
 
     // scrapeSearchArtist('kublai');
     // scrapeSearchArtistDirect('taylor swift');
-    scrapeGetArtistDirect('5BIOo2mCAokFcLHXO2Llb4');
+    // scrapeGetArtistDirect('5BIOo2mCAokFcLHXO2Llb4');
+    scrapeGetAlbumDirect('1xfiE1XllZeRL2LT7zB7Ns');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
     // scrapeSearchArtist2('joker');
@@ -284,5 +322,6 @@ async function scrapeGetArtistDirect(artistID) {
         scrapeGetAlbums,
         scrapeGetArtist,
         scrapeSearchArtistDirect,
-        scrapeGetArtistDirect
+        scrapeGetArtistDirect,
+        scrapeGetAlbumDirect
     }
