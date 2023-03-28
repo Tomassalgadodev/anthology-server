@@ -35,6 +35,13 @@ app.get('/api/v1/artistSearch/:searchTerm', async (request, response) => {
     });
 });
 
+app.get('/api/v1/artistSearchData/:searchTerm', async (request, response) => {
+   
+    const artistSearchData = await scrapers.scrapeSearchArtistDirect(request.params.searchTerm);
+
+    response.json(artistSearchData);
+});
+
 app.get('/api/v1/artist/:artistID', async (request, response) => {
 
     const artistInfo = await scrapers.scrapeGetArtist(request.params.artistID);

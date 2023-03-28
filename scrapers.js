@@ -150,24 +150,9 @@ async function scrapeGetArtist(artistID) {
 
 }
 
-async function scrapeSearchArtist2(artist) {
-    const url = `https://www.allmusic.com/search/artists/${artist}`;
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(url)
+async function scrapeSearchArtistDirect(artist) {
 
-    const [el] = await page.$x('//*[@id="cmn_wrap"]/div/div[2]/div/ul/li[1]/div[2]/div[1]/a');
-    const txt = await el.getProperty('textContent');
-    const artistName = await txt.jsonValue();
-
-    console.log(artistName);
-
-    browser.close();
-}
-
-async function scrapeSearchArtist3(artist) {
-
-    const start = Date.now();
+    // const start = Date.now();
     let data;
 
     const artistUrl = `https://open.spotify.com/search/${artist}/artists`;
@@ -177,7 +162,7 @@ async function scrapeSearchArtist3(artist) {
     await page.setRequestInterception(true);
 
     // let i = 0;
-    let j = 0;
+    // let j = 0;
     // let k = 0;
 
     page.on('request', async (request) => {
@@ -198,9 +183,9 @@ async function scrapeSearchArtist3(artist) {
                 url.includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=search') || 
                 url.includes('https://open.spotifycdn.com/cdn/build/web-player')
                 ) {
-                console.log('BINGO ' + j);
-                j++;
-                console.log(url);
+                // console.log('BINGO ' + j);
+                // j++;
+                // console.log(url);
                 request.continue();
             } else {
                 // console.log(i);
@@ -213,9 +198,12 @@ async function scrapeSearchArtist3(artist) {
 
     });
 
+    // Code below was initially grabbing the preflight response and causing the code to crash when trying to parse the response body to json. 
+    // This is why we check the method type to make sure its a GET request and the method type isn't OPTIONS, 
+    // which is what it would be for a preflight request
+
     page.on('response', async(response) => {
-        const request = response.request();
-        
+        const request = response.request();    
         if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=searchArtists') && request.method() === 'GET') {
             data = await response.json();
         }
@@ -223,16 +211,16 @@ async function scrapeSearchArtist3(artist) {
 
     await page.goto(artistUrl, {"waitUntil" : "networkidle0"});
 
-    console.log(data);
+    // console.log(data);
     browser.close();
-    console.log(`Total time: ${Date.now() - start} milliseconds`);
+    // console.log(`Total time: ${Date.now() - start} milliseconds`);
     return data;
 }
 
 // Function Calls:
 
     // scrapeSearchArtist('kublai');
-    scrapeSearchArtist3('taylor swift');
+    scrapeSearchArtistDirect('taylor swift');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
     // scrapeSearchArtist2('joker');
@@ -240,5 +228,6 @@ async function scrapeSearchArtist3(artist) {
     module.exports = {
         scrapeSearchArtist,
         scrapeGetAlbums,
-        scrapeGetArtist
+        scrapeGetArtist,
+        scrapeSearchArtistDirect
     }
