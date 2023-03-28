@@ -1,3 +1,4 @@
+const { response } = require('express');
 const puppeteer = require('puppeteer');
 
 // Screen cap webpage:
@@ -100,6 +101,9 @@ async function scrapeGetAlbums(url) {
 }
 
 async function scrapeGetArtist(artistID) {
+
+    const start = Date.now();
+
     const url = `https://open.spotify.com/artist/${artistID}`;
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -146,6 +150,7 @@ async function scrapeGetArtist(artistID) {
     const artistInfo = { artistName: artistName, artistImage: artistImage, albums: albums }
     // console.log(artistInfo);
     browser.close();
+    console.log(`Total time: ${Date.now() - start} milliseconds`);
     return artistInfo;
 
 }
@@ -217,10 +222,59 @@ async function scrapeSearchArtistDirect(artist) {
     return data;
 }
 
+async function scrapeGetArtistDirect(artistID) {
+
+    // const start = Date.now();
+    let data;
+
+    const url = `https://open.spotify.com/artist/${artistID}`;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+
+    // let i = 0;
+    // let j = 0;
+    // let k = 0;
+
+    page.on('request', async (request) => {
+        const url = request.url();
+
+        if (
+            url.includes(artistID) ||
+            url.includes('https://open.spotifycdn.com/cdn/build/web-player')
+            ) {
+            // console.log('BINGO: ' + i);
+            // i++;
+            // console.log(url);
+            request.continue();
+        } else {
+            // console.log('STUBBED: ' + j);
+            // j++;
+            // console.log(url);
+            request.abort();
+        }
+    });
+
+    page.on('response', async (response) => {
+        const request = response.request();
+        if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=queryArtistOverview&variables') && request.method() === 'GET') {
+            data = await response.json();
+        }
+    });
+
+    await page.goto(url, {"waitUntil" : "networkidle0"});
+    browser.close();
+    // console.log(data);
+    // console.log(`Total time: ${Date.now() - start} milliseconds`);
+    return(data);
+}
+
 // Function Calls:
 
     // scrapeSearchArtist('kublai');
-    scrapeSearchArtistDirect('taylor swift');
+    // scrapeSearchArtistDirect('taylor swift');
+    scrapeGetArtistDirect('5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetAlbums('https://open.spotify.com/artist/5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetArtist('3LZZPxNDGDFVSIPqf4JuEf');
     // scrapeSearchArtist2('joker');
@@ -229,5 +283,6 @@ async function scrapeSearchArtistDirect(artist) {
         scrapeSearchArtist,
         scrapeGetAlbums,
         scrapeGetArtist,
-        scrapeSearchArtistDirect
+        scrapeSearchArtistDirect,
+        scrapeGetArtistDirect
     }

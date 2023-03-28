@@ -26,6 +26,8 @@ app.get('/', (request, response) => {
   response.send('Oh hey No Skips');
 });
 
+// OLD
+
 app.get('/api/v1/artistSearch/:searchTerm', async (request, response) => {
    
     const artists = await scrapers.scrapeSearchArtist(request.params.searchTerm);
@@ -35,13 +37,6 @@ app.get('/api/v1/artistSearch/:searchTerm', async (request, response) => {
     });
 });
 
-app.get('/api/v1/artistSearchData/:searchTerm', async (request, response) => {
-   
-    const artistSearchData = await scrapers.scrapeSearchArtistDirect(request.params.searchTerm);
-
-    response.json(artistSearchData);
-});
-
 app.get('/api/v1/artist/:artistID', async (request, response) => {
 
     const artistInfo = await scrapers.scrapeGetArtist(request.params.artistID);
@@ -49,6 +44,22 @@ app.get('/api/v1/artist/:artistID', async (request, response) => {
     response.json({
         artistInfo: artistInfo
     });
+});
+
+// NEW
+
+app.get('/api/v1/artistSearchData/:searchTerm', async (request, response) => {
+   
+    const artistSearchData = await scrapers.scrapeSearchArtistDirect(request.params.searchTerm);
+
+    response.json(artistSearchData);
+});
+
+app.get('/api/v1/artistData/:artistID', async (request, response) => {
+    
+    const artistData = await scrapers.scrapeGetArtistDirect(request.params.artistID);
+
+    response.json(artistData);
 });
 
 app.get('/api/v1/users', async (req, res) => {
