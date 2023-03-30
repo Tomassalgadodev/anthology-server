@@ -237,9 +237,9 @@ app.post('/api/v1/logout', async (req, res) => {
 
 app.post('/api/v1/addSavedAlbum', async (req, res) => {
 
-    const { albumArt, albumTitle, artistID, artistName, link, yearReleased, albumID } = req.body;
+    const { albumArt, albumTitle, artistID, artistName, link, yearReleased, albumID, likedSongs } = req.body;
 
-    if (!albumArt || !albumTitle || !artistID || !artistName || !link || !yearReleased || !albumID) {
+    if (!albumArt || !albumTitle || !artistID || !artistName || !link || !yearReleased || !albumID || !likedSongs) {
         res.status(422).send({ msg: 'Missing album data' });
         return;
     }
@@ -256,9 +256,9 @@ app.post('/api/v1/addSavedAlbum', async (req, res) => {
             username = username[0][0].username;
             const attemptAddAlbum = await db.query(
                 `UPDATE user_data 
-                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?))
+                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))
                 WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
-                [albumArt, albumTitle, artistID, artistName, link, yearReleased, albumID, username, link]
+                [albumArt, albumTitle, artistID, artistName, link, yearReleased, albumID, likedSongs, username, link]
             )
             
             if (attemptAddAlbum[0].changedRows > 0) {
