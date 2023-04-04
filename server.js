@@ -254,6 +254,19 @@ app.post('/api/v1/addSavedAlbum', async (req, res) => {
     
         if (username[0].length === 1) {
             username = username[0][0].username;
+
+            // const likedSongsObjects = likedSongs.reduce((objects, likedSong, index) => {
+            //     let likedSongsObject = `JSON_OBJECT('trackName', '${likedSong.trackName}', 'trackNumber', ${likedSong.trackNumber})`;
+            //     index !== likedSongs.length - 1 ? likedSongsObject += ', \n' : '';
+            //     console.log(likedSong);
+            //     return objects += likedSongsObject;
+            // }, '');
+
+            // const likedSongsArray = `JSON_ARRAY(${likedSongsObjects})`;
+
+            // console.log(likedSongsArray);
+
+
             const attemptAddAlbum = await db.query(
                 `UPDATE user_data 
                 SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))

@@ -273,7 +273,7 @@ async function scrapeGetArtistDirect(artistID) {
 async function scrapeGetAlbumDirect(albumID) {
 
     let data;
-    let data2;
+    // let data2;
 
     const url = `https://open.spotify.com/album/${albumID}`;
     const browser = await puppeteer.launch();
@@ -287,7 +287,8 @@ async function scrapeGetAlbumDirect(albumID) {
         if (
             url.includes(albumID) ||
             url.includes('https://open.spotifycdn.com/cdn/build/web-player') ||
-            url.includes('https://spclient.wg.spotify.com/gabo-receiver-service/public/v3/events')
+            url.includes('https://spclient.wg.spotify.com/gabo-receiver-service/public/v3/events') ||
+            url.includes('getAlbums&variables')
             ) {
             request.continue();
         } else {
@@ -297,18 +298,20 @@ async function scrapeGetAlbumDirect(albumID) {
 
     page.on('response', async (response) => {
         const request = response.request();
-        if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=getAlbumMetadata&variables') && request.method() === 'GET') {
+
+        if (request.url().includes('getAlbum&variables') && request.method() === 'GET') {
             data = await response.json();
         }
-        if (request.url().includes('https://api-partner.spotify.com/pathfinder/v1/query?operationName=queryAlbumTracks&variables') && request.method() === 'GET') {
-            data2 = await response.json();
-        }
+        // if (request.url().includes('AlbumTracks&variables') && request.method() === 'GET') {
+        //     console.log('RESPONSE', request.url());
+        //     data2 = await response.json();
+        // }
     });
 
     await page.goto(url, {"waitUntil" : "networkidle0"});
     browser.close();
     // console.log(data, data2);
-    return([data, data2]);
+    return(data);
 }
 
 // Function Calls:
