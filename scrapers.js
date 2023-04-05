@@ -366,5 +366,6 @@ async function scrapeGetArtistSingles(artistID) {
         scrapeGetArtist,
         scrapeSearchArtistDirect,
         scrapeGetArtistDirect,
-        scrapeGetAlbumDirect
+        scrapeGetAlbumDirect,
+        scrapeGetArtistSingles
     }

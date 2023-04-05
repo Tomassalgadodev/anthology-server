@@ -62,12 +62,19 @@ app.get('/api/v1/artistData/:artistID', async (request, response) => {
     response.json(artistData);
 });
 
+app.get('/api/v1/artistSingleAndEpData/:artistID', async (request, response) => {
+
+    const artistSingleAndEpData = await scrapers.scrapeGetArtistSingles(request.params.artistID);
+
+    response.json(artistSingleAndEpData);
+});
+
 app.get('/api/v1/album/:albumID', async (request, response) => {
 
     const albumData = await scrapers.scrapeGetAlbumDirect(request.params.albumID);
 
     response.json(albumData);
-})
+});
 
 app.get('/api/v1/users', async (req, res) => {
     const users = await db.query('SELECT * FROM users');
