@@ -353,12 +353,49 @@ async function scrapeGetArtistSingles(artistID) {
     return(data);
 }
 
+async function scrapeGetArtistAlbums(artistID) {
+    
+    let data;
+
+    const url = `https://open.spotify.com/artist/${artistID}/discography/album`;
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+
+    page.on('request', async (request) => {
+        const url = request.url();
+
+        if (
+            url.includes(artistID) ||
+            url.includes('https://open.spotifycdn.com/cdn/build/web-player')
+            ) {
+            request.continue();
+        } else {
+            request.abort();
+        }
+    });
+
+    page.on('response', async (response) => {
+        const request = response.request();
+        if (request.url().includes('queryArtistDiscographyAlbums&variables') && request.method() === 'GET') {
+            data = await response.json();
+        }
+    });
+
+    await page.goto(url, {"waitUntil" : "networkidle0"});
+    browser.close();
+    return(data);
+
+}
+
 // Function Calls:
 
     // scrapeSearchArtistDirect('taylor swift');
     // scrapeGetArtistDirect('5BIOo2mCAokFcLHXO2Llb4');
     // scrapeGetAlbumDirect('1xfiE1XllZeRL2LT7zB7Ns');
     // scrapeGetArtistSingles('6guC9FqvlVboSKTI77NG2k');
+    // scrapeGetArtistAlbums('4STHEaNw4mPZ2tzheohgXB');
 
     module.exports = {
         scrapeSearchArtist,
@@ -367,5 +404,6 @@ async function scrapeGetArtistSingles(artistID) {
         scrapeSearchArtistDirect,
         scrapeGetArtistDirect,
         scrapeGetAlbumDirect,
-        scrapeGetArtistSingles
+        scrapeGetArtistSingles,
+        scrapeGetArtistAlbums
     }
