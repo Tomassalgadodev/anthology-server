@@ -194,15 +194,21 @@ app.post('/api/v1/users', async (req, res) => {
 });
 
 app.post('/api/v1/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, linkedToSpotify } = req.body;
 
-    if (username && password) {
+    if (username && password && !linkedToSpotify) {
 
         const user = await db.query(
             'SELECT * FROM users WHERE username = ?',
             [username]
         )
 
+        console.log(user);
+
+        if (user[0][0].linked_to_spotify) {
+            res.status(422).send({ msg: 'Account linked to spotify' });
+            return;
+        }
         
         if (user[0].length === 1) {
             
@@ -210,6 +216,7 @@ app.post('/api/v1/login', async (req, res) => {
                 res.status(401).send({ msg: 'Wrong password' });
                 return;
             }
+
 
             const sessionID = uuid();
             const username = user[0][0].username
