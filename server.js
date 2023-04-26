@@ -6,6 +6,14 @@ const db = require('./database');
 const uuid = require('uuid').v4;
 const app = express();
 
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({
+    limit: '50mb',
+    extended: true
+}));
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     next();
@@ -88,9 +96,23 @@ app.get('/api/v1/users', async (req, res) => {
     res.send(users[0]);
 });
 
+app.get('/api/v1/user/:spotifyID', async (req, res) => {
+    let user = await db.query(
+        `SELECT username FROM users
+        WHERE spotify_id = ?`,
+        [req.params.spotifyID]
+    );
+
+    if (user[0].length === 0) {
+        res.status(200).send({ msg: 'account not created yet' });
+    } else {
+        res.status(200).send({ msg: 'account exists' });
+    }
+});
+
 app.get('/api/v1/user', async (req, res) => {
 
-    // console.log('cookie:', req.headers.cookie);
+    console.log('cookie:', req.headers.cookie);
     if(req.headers.cookie) {
         const sessionID = req.headers.cookie.substring(8);
         let username = await db.query(
@@ -166,20 +188,67 @@ app.get('/api/v1/savedAlbums', async (req, res) => {
 });
 
 app.post('/api/v1/users', async (req, res) => {
-    const { username, password, firstname, lastname, email } = req.body;
+    const { username, password, firstname, lastname, email, linkedToSpotify, spotifyID } = req.body;
+
+    if (linkedToSpotify) {
+
+        const userWithSameSpotifyUserID = await db.query(
+            `SELECT * FROM users WHERE spotify_id = ?`,
+            [spotifyID]
+        );
+
+        if (userWithSameSpotifyUserID[0].length !== 0) {
+            res.status(401).send({ msg: 'user with that spotify id already exists'});
+            return;
+        }
+
+        const usersWithSpotifyIDAsUsername = await db.query(
+            `SELECT * FROM users WHERE username LIKE ?`,
+            [spotifyID + '%']
+        );
+
+        let newUsername = spotifyID;
+
+        if (usersWithSpotifyIDAsUsername[0].length !== 0) {
+            if (usersWithSpotifyIDAsUsername[0].length === 1) {
+                newUsername = spotifyID + '_1';
+            } else {
+                const usernameIDs = usersWithSpotifyIDAsUsername[0].map(user => user.username.substring(spotifyID.length).split('_')[1] * 1).filter(number => !isNaN(number));
+
+                if (usernameIDs.length > 0) {
+                    const newID = Math.max(...usernameIDs) + 1;
+                    newUsername = spotifyID + '_' + newID;
+                } else {
+                    newUsername = spotifyID + '_1';
+                }
+            }
+        }
+
+        try {   
+            db.query(
+                'INSERT INTO users(username, password, first_name, last_name, email, linked_to_spotify, spotify_id) VALUES(?, ?, ?, ?, ?, ?, ?)',
+                [newUsername, password, firstname, lastname, email, linkedToSpotify, spotifyID]
+            );
+            res.status(201).send({ msg: 'Created User', username: newUsername });
+            return;
+        } catch (err) {
+            console.log(err);
+            return;
+        }
+    }
     
     if (username && password && firstname && lastname && email) {
 
         const userWithUsername = await db.query(
             `SELECT * FROM users WHERE username = ?`,
             [username]
-        )
+        );
 
         if (userWithUsername[0].length === 0) {
             try {
                 db.query(
-                    'INSERT INTO users(username, password, first_name, last_name, email) VALUES(?, ?, ?, ?, ?)',
-                    [username, password, firstname, lastname, email]
+                    'INSERT INTO users(username, password, first_name, last_name, email, linked_to_spotify) VALUES(?, ?, ?, ?, ?, ?)',
+                    [username, password, firstname, lastname, email, linkedToSpotify]
                 );
                 res.status(201).send({ msg: 'Created User' });
             } catch (err) {
@@ -196,12 +265,35 @@ app.post('/api/v1/users', async (req, res) => {
 app.post('/api/v1/login', async (req, res) => {
     const { username, password, linkedToSpotify } = req.body;
 
-    if (username && password && !linkedToSpotify) {
+    console.log(username);
+
+    if (linkedToSpotify) {
+        const user = await db.query(
+            'SELECT * FROM users WHERE username = ?',
+            [username]
+        );
+
+        console.log(user[0].length === 1);
+
+        if (user[0].length === 1) {
+            const sessionID = uuid();
+            const username = user[0][0].username
+            res.set('Set-Cookie', `session=${sessionID}`);
+            db.query('INSERT INTO cookies(cookie, username) VALUES(?, ?)', [sessionID, username]);
+            res.status(201).send({ msg: 'Success', user: user[0][0] });
+        } else {
+            res.status(404).send({ msg: `User doesn't exist spotify` });
+        }
+
+        return;
+    }
+
+    if (username && password) {
 
         const user = await db.query(
             'SELECT * FROM users WHERE username = ?',
             [username]
-        )
+        );
 
         console.log(user);
 
@@ -276,18 +368,6 @@ app.post('/api/v1/addSavedAlbum', async (req, res) => {
         if (username[0].length === 1) {
             username = username[0][0].username;
 
-            // const likedSongsObjects = likedSongs.reduce((objects, likedSong, index) => {
-            //     let likedSongsObject = `JSON_OBJECT('trackName', '${likedSong.trackName}', 'trackNumber', ${likedSong.trackNumber})`;
-            //     index !== likedSongs.length - 1 ? likedSongsObject += ', \n' : '';
-            //     console.log(likedSong);
-            //     return objects += likedSongsObject;
-            // }, '');
-
-            // const likedSongsArray = `JSON_ARRAY(${likedSongsObjects})`;
-
-            // console.log(likedSongsArray);
-
-
             const attemptAddAlbum = await db.query(
                 `UPDATE user_data 
                 SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))
@@ -345,6 +425,41 @@ app.post('/api/v1/removeSavedAlbum', async (req, res) => {
         res.status(401).send({ msg: 'Not logged in' });
     }
 });
+
+app.post('/api/v1/addMusicCollectionFromSpotify', async (req, res) => {
+    const payloadSize = req.get('content-length');
+    const { albums, singles, username } = req.body;
+
+    if (albums.length > 0) {
+        await albums.forEach(async (album, idx) => {
+            const attemptAddAlbum = await db.query(
+                `UPDATE user_data 
+                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))
+                WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
+                [album.albumArt, album.albumTitle, album.artistID, album.artistName, album.link, album.yearReleased, album.albumID, album.likedSongs, username, album.link]
+            );
+            // ADD ERROR HANDLING IF THE BELOW EXPRESSION WAS FALSE
+            // console.log(attemptAddAlbum[0].changedRows === 1);
+            // console.log('album: ' + idx)
+        });
+    }
+
+    if (singles.length > 0) {
+        await singles.forEach(async (single, idx) => {
+            const attemptAddSingle = await db.query(
+                `UPDATE user_data 
+                SET singles = JSON_ARRAY_APPEND(singles, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))
+                WHERE username = ? AND JSON_SEARCH(singles, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
+                [single.albumArt, single.albumTitle, single.artistID, single.artistName, single.link, single.yearReleased, single.albumID, single.likedSongs, username, single.link]
+            );
+            // ADD ERROR HANDLING IF THE BELOW EXPRESSION WAS FALSE
+            // console.log(attemptAddSingle[0].changedRows === 1);
+            // console.log('single: ' + idx)
+        });
+    }
+
+    res.status(201).send({ msg: `Success!` });
+})
 
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
