@@ -434,9 +434,9 @@ app.post('/api/v1/addMusicCollectionFromSpotify', async (req, res) => {
         await albums.forEach(async (album, idx) => {
             const attemptAddAlbum = await db.query(
                 `UPDATE user_data 
-                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))
+                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?, 'numberOfSongs', ?))
                 WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
-                [album.albumArt, album.albumTitle, album.artistID, album.artistName, album.link, album.yearReleased, album.albumID, album.likedSongs, username, album.link]
+                [album.albumArt, album.albumTitle, album.artistID, album.artistName, album.link, album.yearReleased, album.albumID, album.likedSongs, album.numberOfSongs, username, album.link]
             );
             // ADD ERROR HANDLING IF THE BELOW EXPRESSION WAS FALSE
             // console.log(attemptAddAlbum[0].changedRows === 1);
@@ -448,9 +448,9 @@ app.post('/api/v1/addMusicCollectionFromSpotify', async (req, res) => {
         await singles.forEach(async (single, idx) => {
             const attemptAddSingle = await db.query(
                 `UPDATE user_data 
-                SET singles = JSON_ARRAY_APPEND(singles, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?))
+                SET singles = JSON_ARRAY_APPEND(singles, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?, 'numberOfSongs', ?))
                 WHERE username = ? AND JSON_SEARCH(singles, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
-                [single.albumArt, single.albumTitle, single.artistID, single.artistName, single.link, single.yearReleased, single.albumID, single.likedSongs, username, single.link]
+                [single.albumArt, single.albumTitle, single.artistID, single.artistName, single.link, single.yearReleased, single.albumID, single.likedSongs, single.numberOfSongs, username, single.link]
             );
             // ADD ERROR HANDLING IF THE BELOW EXPRESSION WAS FALSE
             // console.log(attemptAddSingle[0].changedRows === 1);
