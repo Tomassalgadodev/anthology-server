@@ -265,15 +265,11 @@ app.post('/api/v1/users', async (req, res) => {
 app.post('/api/v1/login', async (req, res) => {
     const { username, password, linkedToSpotify } = req.body;
 
-    console.log(username);
-
     if (linkedToSpotify) {
         const user = await db.query(
             'SELECT * FROM users WHERE username = ?',
             [username]
         );
-
-        console.log(user[0].length === 1);
 
         if (user[0].length === 1) {
             const sessionID = uuid();
@@ -295,14 +291,12 @@ app.post('/api/v1/login', async (req, res) => {
             [username]
         );
 
-        console.log(user);
-
-        if (user[0][0].linked_to_spotify) {
-            res.status(422).send({ msg: 'Account linked to spotify' });
-            return;
-        }
-        
         if (user[0].length === 1) {
+            
+            if (user[0][0].linked_to_spotify) {
+                res.status(422).send({ msg: 'Account linked to spotify' });
+                return;
+            }
             
             if (user[0][0].password !== password) {
                 res.status(401).send({ msg: 'Wrong password' });
@@ -370,7 +364,7 @@ app.post('/api/v1/addSavedAlbum', async (req, res) => {
 
             const attemptAddAlbum = await db.query(
                 `UPDATE user_data 
-                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ? 'numberOfSongs', ?))
+                SET albums = JSON_ARRAY_APPEND(albums, '$', JSON_OBJECT('albumArt', ?, 'albumTitle', ?, 'artistID', ?, 'artistName', ?, 'link', ?, 'yearReleased', ?, 'albumID', ?, 'likedSongs', ?, 'numberOfSongs', ?))
                 WHERE username = ? AND JSON_SEARCH(albums, 'one', ?, NULL, '$[*]."link"') IS NULL;`,
                 [albumArt, albumTitle, artistID, artistName, link, yearReleased, albumID, likedSongs, numberOfSongs, username, link]
             )
