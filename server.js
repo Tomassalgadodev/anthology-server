@@ -459,4 +459,4 @@ app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on PORT ${app.get('port')}.`);
 });
 
-// Figure out how to get this shit to work with the headless browser that puppeteer uses
+// Figure out how to get this shit to work with the headless browser that puppeteer uses. 
