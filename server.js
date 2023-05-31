@@ -97,10 +97,9 @@ app.get('/api/v1/artistAlbumData/:artistID', async (request, response) => {
 
 app.get('/api/v1/album/:albumID', async (request, response) => {
 
-    // const albumData = await scrapers.scrapeGetAlbumDirect(request.params.albumID);
+    const albumData = await scrapers.scrapeGetAlbumDirect(request.params.albumID);
 
-    // response.json(albumData);
-    response.send('working');
+    response.json(albumData);
 });
 
 app.get('/api/v1/users', async (req, res) => {
