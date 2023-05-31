@@ -6,15 +6,15 @@ const db = require('./database');
 const uuid = require('uuid').v4;
 const app = express();
 
-const {join} = require('path');
+// const {join} = require('path');
 
-/**
- * @type {import("puppeteer").Configuration}
- */
-module.exports = {
-  // Changes the cache location for Puppeteer.
-  cacheDirectory: join(__dirname, '.cache', 'puppeteer'),
-};
+// /**
+//  * @type {import("puppeteer").Configuration}
+//  */
+// module.exports = {
+//   // Changes the cache location for Puppeteer.
+//   cacheDirectory: join(__dirname, '.cache', 'puppeteer'),
+// };
 
 
 const bodyParser = require('body-parser');
