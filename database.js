@@ -2,14 +2,14 @@ const mysql = require('mysql2');
 
 const database = mysql.createConnection({
     host: 'us-cdbr-east-06.cleardb.net',
-    user: 'b8c2ed6a2e4d43',
-    password: 'c8f89cdd',
-    database: 'heroku_76cbec24ca88224'
+    user: 'b33f2d4d88e223',
+    password: '10bb9e42',
+    database: 'heroku_e7210234ae5c71b'
 }).promise();
 
 module.exports = database;
 
-// mysql://b8c2ed6a2e4d43:c8f89cdd@us-cdbr-east-06.cleardb.net/heroku_76cbec24ca88224?reconnect=true
+// mysql://b33f2d4d88e223:10bb9e42@us-cdbr-east-06.cleardb.net/heroku_e7210234ae5c71b?reconnect=true
 
 // const database = mysql.createConnection({
 //     host: '127.0.0.1',
