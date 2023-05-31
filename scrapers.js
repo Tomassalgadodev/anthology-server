@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 
 const {join} = require('path');
 
-// Screen cap webpage:
+// Screen cap webpage: wsdf
 
     // await page.screenshot({
     //     path: './screenshot.png',
