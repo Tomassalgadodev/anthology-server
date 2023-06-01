@@ -32,7 +32,7 @@ const handleDisconnect = () => {
     });
 }
 
-const db = connection.promise();
+const db = connection;
 
 module.exports = {
     db,    
