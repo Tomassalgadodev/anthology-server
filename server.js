@@ -2,7 +2,7 @@ const { response, request } = require('express');
 const express = require('express');
 const cors = require('cors');
 const scrapers = require('./scrapers');
-const db = require('./database');
+const { db, handleDisconnect } = require('./database');
 const uuid = require('uuid').v4;
 const app = express();
 
@@ -37,6 +37,7 @@ app.use(cors({
     credentials: true
 }));
 
+handleDisconnect();
 
 app.set('port', process.env.PORT || 8000);
 app.locals.title = 'No Skips';
